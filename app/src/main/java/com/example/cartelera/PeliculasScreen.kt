@@ -1,6 +1,5 @@
 package com.example.cartelera
 
-import android.R.attr.onClick
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -16,6 +15,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -27,30 +27,51 @@ import androidx.compose.ui.unit.dp
 import com.example.cartelera.ui.theme.CarteleraTheme
 
 @Composable
-fun PeliculasScreen(onPeliculaClick: (Int) -> Unit) {
+fun PeliculasScreen(
+    correo: String,
+    onPeliculaClick: (Int) -> Unit,
+    onCerrarSesion: () -> Unit
+) {
     Column(modifier = Modifier.fillMaxSize()) {
         Text(
             text = "Películas",
             style = MaterialTheme.typography.headlineMedium,
-            modifier = Modifier.padding(16.dp)
+            modifier = Modifier.padding(start = 16.dp, top = 16.dp, end = 16.dp)
         )
+        if (correo.isNotEmpty()) {
+            Text(
+                text = correo,
+                style = MaterialTheme.typography.bodySmall,
+                modifier = Modifier.padding(horizontal = 16.dp)
+            )
+        }
         LazyColumn(
+            modifier = Modifier.weight(1f),
             contentPadding = PaddingValues(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             items(peliculas) { pelicula ->
-                PeliculaItem(pelicula = pelicula,
-                    onClick = { onPeliculaClick(pelicula.id) })
+                PeliculaItem(
+                    pelicula = pelicula,
+                    onClick = { onPeliculaClick(pelicula.id) }
+                )
             }
         }
+        TextButton(
+            onClick = onCerrarSesion,
+            modifier = Modifier.padding(16.dp)
+        ) {
+            Text("Cerrar sesión")
         }
     }
+}
 
 @Composable
 fun PeliculaItem(pelicula: Pelicula, onClick: () -> Unit) {
     Card(
         onClick = onClick,
-        modifier = Modifier.fillMaxWidth()) {
+        modifier = Modifier.fillMaxWidth()
+    ) {
         Row(
             modifier = Modifier.padding(12.dp),
             horizontalArrangement = Arrangement.spacedBy(16.dp),
@@ -82,8 +103,10 @@ fun PeliculaItem(pelicula: Pelicula, onClick: () -> Unit) {
 @Composable
 fun PeliculasScreenPreview() {
     CarteleraTheme {
-        PeliculasScreen(onPeliculaClick = { peliculaId ->
-            // Acción de prueba para el preview
-        })
+        PeliculasScreen(
+            correo = "usuario@ejemplo.com",
+            onPeliculaClick = {},
+            onCerrarSesion = {}
+        )
     }
 }
