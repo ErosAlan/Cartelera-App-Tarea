@@ -15,6 +15,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.ui.Modifier
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -22,11 +23,12 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import com.google.firebase.auth.FirebaseAuth
 
 
 @Composable
-fun LoginScreen(onLoginOk: () -> Unit) {
-    var usuario by rememberSaveable { mutableStateOf("") }
+fun LoginScreen(onLoginOk: () -> Unit, onRegistrarse: () -> Unit) {
+    var correo by rememberSaveable { mutableStateOf("") }
     var contrasena by rememberSaveable { mutableStateOf("") }
     var hayError by rememberSaveable { mutableStateOf(false) }
     Column(
@@ -47,10 +49,13 @@ fun LoginScreen(onLoginOk: () -> Unit) {
         )
         OutlinedTextField(
             isError = hayError,
-            value = usuario,
-            onValueChange = { usuario = it },
-            label = { Text("Usuario") },
+            value = correo,
+            onValueChange = { correo = it },
+            label = { Text("Correo electrónico") },
             singleLine = true,
+            keyboardOptions = KeyboardOptions(
+                keyboardType = KeyboardType.Email
+            ),
             modifier = Modifier.fillMaxWidth()
         )
         OutlinedTextField(
@@ -73,15 +78,25 @@ fun LoginScreen(onLoginOk: () -> Unit) {
         }
         Button(
             onClick = {
-                if (usuario.trim() == "admin" && contrasena == "admin") {
-                    onLoginOk()
-                } else {
+                if (correo.isBlank() || contrasena.isBlank()) {
                     hayError = true
+                } else {
+                    FirebaseAuth.getInstance().signInWithEmailAndPassword(correo.trim(), contrasena)
+                        .addOnCompleteListener { tarea ->
+                            if (tarea.isSuccessful) {
+                                onLoginOk()
+                            } else {
+                                hayError = true
+                            }
+                        }
                 }
             },
             modifier = Modifier.fillMaxWidth()
         ) {
             Text("Ingresar")
+        }
+        TextButton(onClick = onRegistrarse) {
+            Text("¿No tienes cuenta? Regístrate")
         }
     }
 }
@@ -90,6 +105,6 @@ fun LoginScreen(onLoginOk: () -> Unit) {
 @Composable
 fun LoginScreenPreview() {
     CarteleraTheme {
-        LoginScreen(onLoginOk = { })
+        LoginScreen(onLoginOk = { }, onRegistrarse = { })
     }
 }
